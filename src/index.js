@@ -16,7 +16,6 @@ import UserRoutes from "./routes/user.js";
 import CartRoutes from "./routes/cart.js";
 import CitiesRoutes from "./routes/cities.js";
 
-
 dotenv.config();
 
 const app = express();
@@ -42,7 +41,6 @@ app.use(
   })
 );
 app.use(cookieParser());
-
 
 // routes
 app.use("/api/v1/auth", AuthRoutes);

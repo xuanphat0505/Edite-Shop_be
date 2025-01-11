@@ -81,7 +81,7 @@ export const login = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Login success",
-      data: { ...rest, accessToken },
+      data: { ...rest, accessToken, admin: role === "admin" ? true : false },
     });
   } catch (error) {
     return res.status(500).json({ success: false, error: error.message });

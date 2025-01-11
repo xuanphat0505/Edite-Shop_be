@@ -3,6 +3,28 @@ import bcrypt from "bcryptjs";
 import UserModel from "../Models/UserModel.js";
 import { mailService } from "../../services/MailService.js";
 
+export const getNewUsers = async (req, res) => {
+  const days = parseInt(req.query.days) || 7;
+  try {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    const users = await UserModel.find({ createdAt: { $gte: startDate } });
+    return res.status(200).json({ success: true, newUser: users.length });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+};
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await UserModel.find();
+    return res
+      .status(200)
+      .json({ success: true, users: users, count: users.length });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+};
 export const resetPassword = async (req, res) => {
   const { email } = req.body;
   try {
@@ -27,13 +49,10 @@ export const resetPassword = async (req, res) => {
       html: `<p>Your new password is: <b style="color:blue">${randomPassword}</b>. Please don't send it to anyone !! </p>`,
     });
 
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message:
-          "Please check your email. Password has been sent to your email",
-      });
+    return res.status(200).json({
+      success: true,
+      message: "Please check your email. Password has been sent to your email",
+    });
   } catch (error) {
     return res.status(400).json({ success: false, error: error.message });
   }

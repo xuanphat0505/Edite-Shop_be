@@ -7,6 +7,7 @@ import {
   getProductDetail,
   addRecentlyViewedProduct,
   getRecentlyProduct,
+  getCategoyDitribution,
 } from "../app/Controllers/ProductControllers.js";
 import { verifyToken } from "../utils/verify.js";
 
@@ -14,8 +15,9 @@ const router = express.Router();
 
 router.get("/filter", getFilterProducts);
 router.get("/count", getProductCount);
-router.post("/search", getProductBySearch);
+router.get("/search", getProductBySearch);
 router.get("/recently", verifyToken, getRecentlyProduct);
+router.get("/category-ditribution", getCategoyDitribution);
 router.post("/recently/:productId", verifyToken, addRecentlyViewedProduct);
 
 router.get("/", getProducts);

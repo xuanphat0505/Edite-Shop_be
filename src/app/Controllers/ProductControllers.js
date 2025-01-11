@@ -47,7 +47,7 @@ export const getFilterProducts = async (req, res) => {
     const filteredProducts = await ProductModel.find({
       category: {
         $elemMatch: {
-          categoryType: categoryType,
+          categoryType: { $regex: new RegExp(`^${categoryType}$`, "i") },
         },
       },
     });
@@ -81,7 +81,7 @@ export const getProductCount = async (req, res) => {
 };
 
 export const getProductBySearch = async (req, res) => {
-  const { name } = req.body;
+  const { name } = req.query;
   try {
     if (!name || typeof name !== "string") {
       return res
@@ -98,6 +98,35 @@ export const getProductBySearch = async (req, res) => {
       });
     }
     return res.status(200).json({ success: true, data: products });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+export const getCategoyDitribution = async (req, res) => {
+  try {
+    const totalProducts = await ProductModel.countDocuments();
+    if (totalProducts === 0) {
+      return res.status(200).json({ success: true, data: [] });
+    }
+    const categoryDitribution = await ProductModel.aggregate([
+      {
+        $unwind: "$category",
+      },
+      {
+        $group: {
+          _id: "$category.categoryType",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+    const categoryDitributionDatas = categoryDitribution.map((item) => ({
+      name: item._id,
+      value: item.count,
+    }));
+    return res
+      .status(200)
+      .json({ success: true, data: categoryDitributionDatas });
   } catch (error) {
     return res.status(500).json({ success: false, error: error.message });
   }
