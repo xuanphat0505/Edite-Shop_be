@@ -75,13 +75,14 @@ export const login = async (req, res) => {
     const refreshToken = generateRefreshToken(user);
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "None",
+      path: "/",
     });
     res.status(200).json({
       success: true,
       message: "Login success",
-      data: { ...rest, accessToken, admin: role === "admin" ? true : false },
+      data: { ...rest, accessToken },
     });
   } catch (error) {
     return res.status(500).json({ success: false, error: error.message });
@@ -107,6 +108,7 @@ export const logout = async (req, res) => {
 };
 export const refreshToken = async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
+  
   try {
     // check refresh token
     if (!refreshToken) {
@@ -126,8 +128,9 @@ export const refreshToken = async (req, res) => {
       const newAccessToken = generateAccessToken(user);
       res.cookie("refreshToken", newRefreshToken, {
         httpOnly: true,
-        secure: true,
-        sameSite: "strict",
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "None",
+        path: "/",
       });
       res.status(200).json({ success: true, accessToken: newAccessToken });
     });
@@ -181,8 +184,9 @@ export const googleLogin = async (req, res) => {
     const { password, role, ...rest } = user._doc;
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "None",
+      path: "/",
     });
 
     res.status(200).json({
