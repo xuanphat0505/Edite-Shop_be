@@ -43,8 +43,10 @@ const ProductSchema = new mongoose.Schema({
   ],
   category: [
     {
-      categoryType: String,
-      required: true,
+      categoryType: {
+        type: String,
+        required: true,
+      },
     },
   ],
   image: {
@@ -66,10 +68,6 @@ const ProductSchema = new mongoose.Schema({
       },
     },
   ],
-  category: {
-    type: String,
-    required: true,
-  },
   date: {
     type: String,
     required: true,
