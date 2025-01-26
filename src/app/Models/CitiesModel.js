@@ -7,9 +7,20 @@ export const CitiesSchema = new mongoose.Schema({
   },
   cities: [
     {
-      type: String,
+      name: {
+        type: String,
+        required: true,
+      },
+      zipCode: {
+        type: String,
+        required: true,
+      },
     },
   ],
+  shippingFees: {
+    type:Number,
+    required: true,
+  },
 });
 
 export const CitiesModel = mongoose.model("cities", CitiesSchema);

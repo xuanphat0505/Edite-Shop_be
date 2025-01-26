@@ -76,7 +76,7 @@ export const login = async (req, res) => {
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "None",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax", // cross-site cookie in production
       path: "/",
     });
     res.status(200).json({
@@ -108,7 +108,7 @@ export const logout = async (req, res) => {
 };
 export const refreshToken = async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
-  
+
   try {
     // check refresh token
     if (!refreshToken) {
@@ -129,7 +129,7 @@ export const refreshToken = async (req, res) => {
       res.cookie("refreshToken", newRefreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "None",
+        sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax", // cross-site cookie in production
         path: "/",
       });
       res.status(200).json({ success: true, accessToken: newAccessToken });
@@ -185,7 +185,7 @@ export const googleLogin = async (req, res) => {
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "None",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax", // cross-site cookie in production
       path: "/",
     });
 
