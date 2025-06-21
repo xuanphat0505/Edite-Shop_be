@@ -1,6 +1,5 @@
-import { VNPay, ignoreLogger, ProductCode, VnpLocale } from "vnpay";
+import { sortObject } from "../../utils/sortObj.js";  
 import bcrypt from "bcryptjs";
-import dayjs from "dayjs";
 import dotenv from "dotenv";
 import Payment from "../Models/PaymentModel.js";
 import OrderModel from "../Models/OrderModel.js";
@@ -8,7 +7,6 @@ import UserModel from "../Models/UserModel.js";
 import axios from "axios";
 import crypto from "crypto";
 import dateFormat from "dateformat";
-import { sortObject } from "../../utils/sortObj.js";
 import querystring from "qs";
 dotenv.config();
 
