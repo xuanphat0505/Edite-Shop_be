@@ -1,4 +1,4 @@
-import { sortObject } from "../../utils/sortObj.js";  
+import { sortObject } from "../../utils/sortObj.js";
 import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
 import Payment from "../Models/PaymentModel.js";
@@ -59,7 +59,7 @@ export const createPayment = async (req, res) => {
       var date = new Date();
 
       var createDate = dateFormat(date, "yyyymmddHHMMss");
-      var expire = new Date(date.getTime() + 30 * 60 * 1000);
+      var expire = new Date(date.getTime() + 15 * 60 * 1000);
       var expireDate = dateFormat(expire, "yyyymmddHHMMss");
 
       var orderInfo = `Thanh toan don hang ${orderId}`;
@@ -225,7 +225,14 @@ export const handlePaymenWithVNPaySuccess = async (req, res) => {
     const isSuccess = vnp_ResponseCode === "00";
     payment.status = isSuccess ? "completed" : "failed";
     payment.transactionId = bcrypt.hashSync(vnp_TransactionNo, 10);
-    payment.paymentDate = dayjs(vnp_PayDate, "YYYYMMDDHHmmss").toDate();
+    const year = vnp_PayDate.substring(0, 4);
+    const month = vnp_PayDate.substring(4, 6);
+    const day = vnp_PayDate.substring(6, 8);
+    const hour = vnp_PayDate.substring(8, 10);
+    const minute = vnp_PayDate.substring(10, 12);
+    const second = vnp_PayDate.substring(12, 14);
+    const paymentDate = new Date(year, month - 1, day, hour, minute, second);
+    payment.paymentDate = paymentDate;
     payment.responseCode = vnp_ResponseCode;
     payment.responseMessage =
       vnp_TransactionStatus === "00"
