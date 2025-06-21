@@ -4,6 +4,7 @@ import {
   handlePaymenWithVNPaySuccess,
   handlePaymentWithMomoSuccess,
   getPaymentInfo,
+  testAPI,
 } from "../app/Controllers/PaymentController.js";
 import { verifyToken } from "../utils/verify.js";
 
@@ -13,4 +14,7 @@ router.post("/create", verifyToken, createPayment);
 router.get("/result-vnpay", handlePaymenWithVNPaySuccess);
 router.get("/result-momo", handlePaymentWithMomoSuccess);
 router.get("/info/:orderId", getPaymentInfo);
+router.post("/test", testAPI);
+
+
 export default router;

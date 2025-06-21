@@ -7,6 +7,9 @@ import OrderModel from "../Models/OrderModel.js";
 import UserModel from "../Models/UserModel.js";
 import axios from "axios";
 import crypto from "crypto";
+import dateFormat from "dateformat";
+import { sortObject } from "../../utils/sortObj.js";
+import querystring from "qs";
 dotenv.config();
 
 export const createPayment = async (req, res) => {
@@ -45,40 +48,51 @@ export const createPayment = async (req, res) => {
     await order.save();
 
     if (paymentMethod === "vnpay") {
-      const vnpay = new VNPay({
-        tmnCode: process.env.VNPAY_TMN_CODE,
-        secureSecret: process.env.VNPAY_HASH_SECRET,
-        vnp_Version: "2.1.0",
-        vnpayHost: "https://sandbox.vnpayment.vn",
-        testMode: true,
-        hashAlgorithm: "SHA512",
-        logger: ignoreLogger,
-      });
+      var ipAddr = req.ip;
 
-      const now = new Date();
-      const tomorrow = dayjs(now).add(1, "day").toDate();
+      var tmnCode = process.env.VNPAY_TMN_CODE;
+      var secretKey = process.env.VNPAY_HASH_SECRET;
+      var vnpUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
+      var returnUrl = "http://localhost:5000/api/v1/payment/result-vnpay";
 
-      const vnp_CreateDate = dayjs(now).format("YYYYMMDDHHmmss");
-      const vnp_ExpireDate = dayjs(tomorrow).format("YYYYMMDDHHmmss");
+      var date = new Date();
 
-      const vnpayResponse = await vnpay.buildPaymentUrl({
-        vnp_Amount: totalAmount, // Chuyển đổi sang đơn vị VNĐ * 100
-        vnp_OrderType: ProductCode.Other,
-        vnp_TxnRef: orderId,
-        vnp_OrderInfo: `Thanh toan don hang ${orderId}`,
-        vnp_ReturnUrl:
-          process.env.VNPAY_RETURN_URL ||
-          "http://localhost:5000/api/v1/payment/result-vnpay",
-        vnp_CreateDate: vnp_CreateDate,
-        vnp_ExpireDate: vnp_ExpireDate,
-        vnp_IpAddr: req.ip || "127.0.0.1",
-        vnp_Locale: VnpLocale.VN,
-      });
+      var createDate = dateFormat(date, "yyyymmddHHMMss");
+      var expire = new Date(date.getTime() + 15 * 60 * 1000);
+      var expireDate = dateFormat(expire, "yyyymmddHHMMss");
+
+      var orderInfo = `Thanh toan don hang ${orderId}`;
+      var orderType = "Other";
+      var locale = "vn";
+      var currCode = "VND";
+      var amount = totalAmount * 100;
+
+      var vnp_Params = {};
+      vnp_Params["vnp_Version"] = "2.1.0";
+      vnp_Params["vnp_Command"] = "pay";
+      vnp_Params["vnp_TmnCode"] = tmnCode;
+      vnp_Params["vnp_Locale"] = locale;
+      vnp_Params["vnp_CurrCode"] = currCode;
+      vnp_Params["vnp_TxnRef"] = orderId;
+      vnp_Params["vnp_OrderInfo"] = orderInfo;
+      vnp_Params["vnp_OrderType"] = orderType;
+      vnp_Params["vnp_Amount"] = amount;
+      vnp_Params["vnp_ReturnUrl"] = returnUrl;
+      vnp_Params["vnp_IpAddr"] = ipAddr;
+      vnp_Params["vnp_CreateDate"] = createDate;
+      vnp_Params["vnp_ExpireDate"] = expireDate;
+
+      vnp_Params = sortObject(vnp_Params);
+
+      var signData = querystring.stringify(vnp_Params, { encode: false });
+      var hmac = crypto.createHmac("sha512", secretKey);
+      var signed = hmac.update(Buffer.from(signData, "utf-8")).digest("hex");
+      vnp_Params["vnp_SecureHash"] = signed;
+      vnpUrl += "?" + querystring.stringify(vnp_Params, { encode: false });
 
       return res.status(200).json({
         success: true,
-        message: "Tạo thanh toán thành công",
-        data: vnpayResponse,
+        data: vnpUrl,
       });
     } else if (paymentMethod === "momo") {
       var partnerCode = "MOMO";
@@ -233,8 +247,9 @@ export const handlePaymenWithVNPaySuccess = async (req, res) => {
 
     // Redirect về trang frontend với thông tin thanh toán
     return res.redirect(
-      process.env.FRONTEND_URL +
-        `/payment-status/result?status=${payment.status}&orderId=${payment.orderId}`
+      process.env.FRONTEND_URL ||
+        "http://localhost:3000" +
+          `/payment-status/result?status=${payment.status}&orderId=${payment.orderId}`
     );
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
@@ -291,8 +306,9 @@ export const handlePaymentWithMomoSuccess = async (req, res) => {
 
     // Redirect về FE
     return res.redirect(
-      process.env.FRONTEND_URL +
-        `/payment-status/result?status=${payment.status}&orderId=${payment.orderId}`
+      process.env.FRONTEND_URL ||
+        "http://localhost:3000" +
+          `/payment-status/result?status=${payment.status}&orderId=${payment.orderId}`
     );
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
@@ -316,6 +332,59 @@ export const getPaymentInfo = async (req, res) => {
     return res.status(200).json({
       success: true,
       data: order.paymentInfo,
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const testAPI = async (req, res) => {
+  try {
+    var ipAddr = req.ip;
+
+    var tmnCode = process.env.VNPAY_TMN_CODE;
+    var secretKey = process.env.VNPAY_HASH_SECRET;
+    var vnpUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
+    var returnUrl = "http://localhost:5000/api/v1/payment/result-vnpay";
+
+    var date = new Date();
+
+    var createDate = dateFormat(date, "yyyymmddHHmmss");
+    var orderId = dateFormat(date, "HHmmss");
+    var expireDate = new Date(date.getTime() + 15 * 60 * 1000);
+    var vnp_ExpireDate = dateFormat(expireDate, "yyyymmddHHmmss");
+    var amount = "100000";
+
+    var orderInfo = "Thanh toan don hang";
+    var orderType = "Other";
+    var locale = "vn";
+    var currCode = "VND";
+    var vnp_Params = {};
+    vnp_Params["vnp_Version"] = "2.1.0";
+    vnp_Params["vnp_Command"] = "pay";
+    vnp_Params["vnp_TmnCode"] = tmnCode;
+    vnp_Params["vnp_Locale"] = locale;
+    vnp_Params["vnp_CurrCode"] = currCode;
+    vnp_Params["vnp_TxnRef"] = orderId;
+    vnp_Params["vnp_OrderInfo"] = orderInfo;
+    vnp_Params["vnp_OrderType"] = orderType;
+    vnp_Params["vnp_Amount"] = amount * 100;
+    vnp_Params["vnp_ReturnUrl"] = returnUrl;
+    vnp_Params["vnp_IpAddr"] = ipAddr;
+    vnp_Params["vnp_CreateDate"] = createDate;
+    vnp_Params["vnp_ExpireDate"] = vnp_ExpireDate;
+
+    vnp_Params = sortObject(vnp_Params);
+
+    var signData = querystring.stringify(vnp_Params, { encode: false });
+    var hmac = crypto.createHmac("sha512", secretKey);
+    var signed = hmac.update(new Buffer(signData, "utf-8")).digest("hex");
+    vnp_Params["vnp_SecureHash"] = signed;
+    vnpUrl += "?" + querystring.stringify(vnp_Params, { encode: false });
+
+    return res.status(200).json({
+      success: true,
+      data: vnpUrl,
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
