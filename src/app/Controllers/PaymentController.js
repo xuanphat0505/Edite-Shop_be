@@ -8,6 +8,7 @@ import axios from "axios";
 import crypto from "crypto";
 import dateFormat from "dateformat";
 import querystring from "qs";
+
 dotenv.config();
 
 export const createPayment = async (req, res) => {
@@ -46,17 +47,19 @@ export const createPayment = async (req, res) => {
     await order.save();
 
     if (paymentMethod === "vnpay") {
-      var ipAddr = req.ip;
+      var ipAddr = req.ip || "127.0.0.1";
 
       var tmnCode = process.env.VNPAY_TMN_CODE;
       var secretKey = process.env.VNPAY_HASH_SECRET;
       var vnpUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-      var returnUrl = "http://localhost:5000/api/v1/payment/result-vnpay";
+      var returnUrl =
+        process.env.VNPAY_RETURN_URL ||
+        "http://localhost:5000/api/v1/payment/result-vnpay";
 
       var date = new Date();
 
       var createDate = dateFormat(date, "yyyymmddHHMMss");
-      var expire = new Date(date.getTime() + 15 * 60 * 1000);
+      var expire = new Date(date.getTime() + 30 * 60 * 1000);
       var expireDate = dateFormat(expire, "yyyymmddHHMMss");
 
       var orderInfo = `Thanh toan don hang ${orderId}`;
