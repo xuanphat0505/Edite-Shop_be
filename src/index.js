@@ -15,6 +15,8 @@ import QuestionRoutes from "./routes/question.js";
 import UserRoutes from "./routes/user.js";
 import CartRoutes from "./routes/cart.js";
 import CitiesRoutes from "./routes/cities.js";
+import PaymentRoutes from "./routes/payment.js";
+import OrderRoutes from "./routes/order.js";  
 
 dotenv.config();
 
@@ -53,8 +55,10 @@ app.use("/api/v1/question", QuestionRoutes);
 app.use("/api/v1/user", UserRoutes);
 app.use("/api/v1/cart", CartRoutes);
 app.use("/api/v1/cities", CitiesRoutes);
+app.use("/api/v1/payment", PaymentRoutes);
+app.use("/api/v1/orders", OrderRoutes);
 
 app.listen(port, () => {
   connectDB();
-  console.log(`connect sever successfull at ${port}`);
+  console.log(`connect sever successful at ${port}`);
 });

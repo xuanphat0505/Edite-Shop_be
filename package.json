@@ -12,18 +12,20 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "axios": "^1.7.7",
+    "axios": "^1.10.0",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^2.5.1",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
+    "dayjs": "^1.11.13",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "google-auth-library": "^9.14.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.6.1",
     "nodemailer": "^6.9.15",
-    "nodemon": "^3.1.4"
+    "nodemon": "^3.1.4",
+    "vnpay": "^2.3.0"
   }
 }

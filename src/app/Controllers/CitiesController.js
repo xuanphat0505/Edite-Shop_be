@@ -50,7 +50,7 @@ export const checkShippingFee = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      data: countryData.shippingFees,
+      data: countryData.shippingFee,
     });
   } catch (error) {
     return res

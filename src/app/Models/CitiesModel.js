@@ -17,8 +17,8 @@ export const CitiesSchema = new mongoose.Schema({
       },
     },
   ],
-  shippingFees: {
-    type:Number,
+  shippingFee: {
+    type: String,
     required: true,
   },
 });
