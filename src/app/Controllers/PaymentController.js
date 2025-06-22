@@ -52,9 +52,7 @@ export const createPayment = async (req, res) => {
       var tmnCode = process.env.VNPAY_TMN_CODE;
       var secretKey = process.env.VNPAY_HASH_SECRET;
       var vnpUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-      var returnUrl =
-        process.env.VNPAY_RETURN_URL ||
-        "http://localhost:5000/api/v1/payment/result-vnpay";
+      var returnUrl = process.env.VNPAY_RETURN_URL;
 
       // Set timezone to Vietnam
       var date = new Date();
