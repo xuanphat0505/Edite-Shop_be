@@ -54,13 +54,9 @@ export const createPayment = async (req, res) => {
       var vnpUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
       var returnUrl = process.env.VNPAY_RETURN_URL;
 
-      // Set timezone to Vietnam
       var date = new Date();
-      date.setHours(date.getHours() + 7); // Convert to Vietnam timezone (GMT+7)
-
       var createDate = dateFormat(date, "yyyymmddHHmmss");
-      // Increase expire time to 30 minutes
-      var expireDate = new Date(date.getTime() + 30 * 60 * 1000);
+      var expireDate = new Date(date.getTime() + 15 * 60 * 1000);
       var vnp_ExpireDate = dateFormat(expireDate, "yyyymmddHHmmss");
 
       var orderInfo = `Thanh toan don hang ${orderId}`;
@@ -194,6 +190,7 @@ export const createPayment = async (req, res) => {
 };
 
 export const handlePaymenWithVNPaySuccess = async (req, res) => {
+  console.log("VNPAY CALLBACK:", req.query);
   try {
     const {
       vnp_PayDate,
@@ -265,6 +262,7 @@ export const handlePaymenWithVNPaySuccess = async (req, res) => {
 };
 
 export const handlePaymentWithMomoSuccess = async (req, res) => {
+  console.log("MOMO CALLBACK:", req.query);
   try {
     // In log để debug các trường MOMO gửi về
     const { orderId, transId, resultCode, message } = req.query;
