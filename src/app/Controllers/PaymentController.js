@@ -47,7 +47,13 @@ export const createPayment = async (req, res) => {
     await order.save();
 
     if (paymentMethod === "vnpay") {
-      var ipAddr = req.ip || "127.0.0.1";
+      var ipAddr =
+        req.headers["x-forwarded-for"] ||
+        req.connection.remoteAddress ||
+        req.socket.remoteAddress ||
+        req.connection.socket.remoteAddress ||
+        req.ip ||
+        "127.0.0.1";
 
       var tmnCode = process.env.VNPAY_TMN_CODE;
       var secretKey = process.env.VNPAY_HASH_SECRET;
@@ -343,5 +349,3 @@ export const getPaymentInfo = async (req, res) => {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
-
-

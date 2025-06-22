@@ -35,6 +35,7 @@ const connectDB = async () => {
 };
 
 // middlewares
+app.set("trust proxy", true);
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 app.use(
