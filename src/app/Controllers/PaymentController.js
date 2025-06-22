@@ -59,7 +59,6 @@ export const createPayment = async (req, res) => {
       var secretKey = process.env.VNPAY_HASH_SECRET;
       var vnpUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
       var returnUrl = process.env.VNPAY_RETURN_URL;
-      var inpUrl = process.env.VNPAY_IPN_URL;
 
       var date = new Date();
       var createDate = dateFormat(date, "yyyymmddHHmmss");
@@ -82,7 +81,6 @@ export const createPayment = async (req, res) => {
       vnp_Params["vnp_OrderType"] = orderType;
       vnp_Params["vnp_Amount"] = totalAmount * 100;
       vnp_Params["vnp_ReturnUrl"] = returnUrl;
-      vnp_Params["vnp_IpnUrl"] = inpUrl;
       vnp_Params["vnp_IpAddr"] = ipAddr;
       vnp_Params["vnp_CreateDate"] = createDate;
       vnp_Params["vnp_ExpireDate"] = vnp_ExpireDate;
