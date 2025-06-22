@@ -12,6 +12,13 @@ import querystring from "qs";
 dotenv.config();
 
 export const createPayment = async (req, res) => {
+  // Thêm vào đầu function createPayment
+  console.log("Environment:", process.env.NODE_ENV);
+  console.log("Return URL:", process.env.VNPAY_RETURN_URL);
+  console.log("IPN URL:", process.env.VNPAY_IPN_URL);
+  console.log("Client IP:", ipAddr);
+  console.log("Generated VNPay URL:", vnpUrl);
+
   const userId = req.user._id;
   const user = await UserModel.findById(userId);
   try {
@@ -59,6 +66,7 @@ export const createPayment = async (req, res) => {
       var secretKey = process.env.VNPAY_HASH_SECRET;
       var vnpUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
       var returnUrl = process.env.VNPAY_RETURN_URL;
+      var inpUrl = process.env.VNPAY_IPN_URL;
 
       var date = new Date();
       var createDate = dateFormat(date, "yyyymmddHHmmss");
@@ -81,6 +89,7 @@ export const createPayment = async (req, res) => {
       vnp_Params["vnp_OrderType"] = orderType;
       vnp_Params["vnp_Amount"] = totalAmount * 100;
       vnp_Params["vnp_ReturnUrl"] = returnUrl;
+      vnp_Params["vnp_IpnUrl"] = inpUrl;
       vnp_Params["vnp_IpAddr"] = ipAddr;
       vnp_Params["vnp_CreateDate"] = createDate;
       vnp_Params["vnp_ExpireDate"] = vnp_ExpireDate;
