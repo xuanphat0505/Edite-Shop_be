@@ -56,17 +56,19 @@ export const createPayment = async (req, res) => {
         process.env.VNPAY_RETURN_URL ||
         "http://localhost:5000/api/v1/payment/result-vnpay";
 
+      // Set timezone to Vietnam
       var date = new Date();
+      date.setHours(date.getHours() + 7); // Convert to Vietnam timezone (GMT+7)
 
-      var createDate = dateFormat(date, "yyyymmddHHMMss");
-      var expire = new Date(date.getTime() + 15 * 60 * 1000);
-      var expireDate = dateFormat(expire, "yyyymmddHHMMss");
+      var createDate = dateFormat(date, "yyyymmddHHmmss");
+      // Increase expire time to 30 minutes
+      var expireDate = new Date(date.getTime() + 30 * 60 * 1000);
+      var vnp_ExpireDate = dateFormat(expireDate, "yyyymmddHHmmss");
 
       var orderInfo = `Thanh toan don hang ${orderId}`;
       var orderType = "Other";
       var locale = "vn";
       var currCode = "VND";
-      var amount = totalAmount * 100;
 
       var vnp_Params = {};
       vnp_Params["vnp_Version"] = "2.1.0";
@@ -77,11 +79,11 @@ export const createPayment = async (req, res) => {
       vnp_Params["vnp_TxnRef"] = orderId;
       vnp_Params["vnp_OrderInfo"] = orderInfo;
       vnp_Params["vnp_OrderType"] = orderType;
-      vnp_Params["vnp_Amount"] = amount;
+      vnp_Params["vnp_Amount"] = totalAmount * 100;
       vnp_Params["vnp_ReturnUrl"] = returnUrl;
       vnp_Params["vnp_IpAddr"] = ipAddr;
       vnp_Params["vnp_CreateDate"] = createDate;
-      vnp_Params["vnp_ExpireDate"] = expireDate;
+      vnp_Params["vnp_ExpireDate"] = vnp_ExpireDate;
 
       vnp_Params = sortObject(vnp_Params);
 
@@ -346,55 +348,4 @@ export const getPaymentInfo = async (req, res) => {
   }
 };
 
-export const testAPI = async (req, res) => {
-  try {
-    var ipAddr = req.ip;
 
-    var tmnCode = process.env.VNPAY_TMN_CODE;
-    var secretKey = process.env.VNPAY_HASH_SECRET;
-    var vnpUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-    var returnUrl = "http://localhost:5000/api/v1/payment/result-vnpay";
-
-    var date = new Date();
-
-    var createDate = dateFormat(date, "yyyymmddHHmmss");
-    var orderId = dateFormat(date, "HHmmss");
-    var expireDate = new Date(date.getTime() + 15 * 60 * 1000);
-    var vnp_ExpireDate = dateFormat(expireDate, "yyyymmddHHmmss");
-    var amount = "100000";
-
-    var orderInfo = "Thanh toan don hang";
-    var orderType = "Other";
-    var locale = "vn";
-    var currCode = "VND";
-    var vnp_Params = {};
-    vnp_Params["vnp_Version"] = "2.1.0";
-    vnp_Params["vnp_Command"] = "pay";
-    vnp_Params["vnp_TmnCode"] = tmnCode;
-    vnp_Params["vnp_Locale"] = locale;
-    vnp_Params["vnp_CurrCode"] = currCode;
-    vnp_Params["vnp_TxnRef"] = orderId;
-    vnp_Params["vnp_OrderInfo"] = orderInfo;
-    vnp_Params["vnp_OrderType"] = orderType;
-    vnp_Params["vnp_Amount"] = amount * 100;
-    vnp_Params["vnp_ReturnUrl"] = returnUrl;
-    vnp_Params["vnp_IpAddr"] = ipAddr;
-    vnp_Params["vnp_CreateDate"] = createDate;
-    vnp_Params["vnp_ExpireDate"] = vnp_ExpireDate;
-
-    vnp_Params = sortObject(vnp_Params);
-
-    var signData = querystring.stringify(vnp_Params, { encode: false });
-    var hmac = crypto.createHmac("sha512", secretKey);
-    var signed = hmac.update(new Buffer(signData, "utf-8")).digest("hex");
-    vnp_Params["vnp_SecureHash"] = signed;
-    vnpUrl += "?" + querystring.stringify(vnp_Params, { encode: false });
-
-    return res.status(200).json({
-      success: true,
-      data: vnpUrl,
-    });
-  } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
-  }
-};
