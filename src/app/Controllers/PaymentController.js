@@ -12,13 +12,6 @@ import querystring from "qs";
 dotenv.config();
 
 export const createPayment = async (req, res) => {
-  // Thêm vào đầu function createPayment
-  console.log("Environment:", process.env.NODE_ENV);
-  console.log("Return URL:", process.env.VNPAY_RETURN_URL);
-  console.log("IPN URL:", process.env.VNPAY_IPN_URL);
-  console.log("Client IP:", ipAddr);
-  console.log("Generated VNPay URL:", vnpUrl);
-
   const userId = req.user._id;
   const user = await UserModel.findById(userId);
   try {
